@@ -5,12 +5,14 @@ from networkx.algorithms.components import strongly_connected_component_subgraph
 from networkx.algorithms.components import connected_component_subgraphs
 import timeit
 import os
+import utils as utils
+import pickle
 
 graph_files = []
-graph_files.append(os.path.join(os.path.pardir, 'dataset', 'wiki_vote', 'Wiki-Vote.txt'))
-graph_files.append(os.path.join(os.path.pardir, 'dataset', 'epinions', 'soc-Epinions1.txt'))
-graph_files.append(os.path.join(os.path.pardir, 'dataset', 'gplus', 'gplus_combined.txt'))
-graph_files.append(os.path.join(os.path.pardir, 'dataset', 'soc_pokec', 'soc-pokec-relationships.txt'))
+graph_files.append(os.path.join('dataset', 'wiki_vote', 'Wiki-Vote.txt'))
+graph_files.append(os.path.join('dataset', 'epinions', 'soc-Epinions1.txt'))
+graph_files.append(os.path.join('dataset', 'gplus', 'gplus_combined.txt'))
+graph_files.append(os.path.join('dataset', 'soc_pokec', 'soc-pokec-relationships.txt'))
 
 
 allfiles_cc_lst = []
@@ -21,8 +23,10 @@ allfiles_largest_cc_len_lst = []
 allfiles_largest_scc_len_lst = []
 allfiles_largest_cc_diam_lst = []
 allfiles_largest_scc_diam_lst = []
+allfiles_timing
 
 for file in graph_files:
+
 	with open(file, "rb") as fh:
 		# import of directed
 		dG = nx.read_adjlist(fh, create_using=nx.DiGraph())
@@ -32,8 +36,9 @@ for file in graph_files:
 		# weakly cc
 		cc = connected_component_subgraphs(G)
 		cc_list = list(cc)
-		allfiles_cc_lst.append(cc)
+		allfiles_cc_lst.append(cc)		
 		print("cc completed")
+		pickle.dump(cc_list, open("cc_list.pkl", "wb"))
 		
 		# strongly cc 
 		scc = strongly_connected_component_subgraphs(dG)
@@ -64,18 +69,11 @@ for file in graph_files:
 		print("largest scc len completed")
 
 		largest_cc_ecc = nx.eccentricity(largest_cc)
+		pickle.dump(largest_cc_ecc, open("ecc_cc.pkl", "wb"))
 		largest_scc_ecc = nx.eccentricity(largest_scc)
-		'''
-		# largest cc/scc diameter
-		largest_cc_diam = nx.diameter(largest_cc)
-		allfiles_largest_cc_diam_lst.append(largest_cc_diam)
-		print("largest cc diameter completed - ", largest_cc_diam)
+		pickle.dump(largest_cc_ecc, open("ecc_scc.pkl", "wb"))
 
-		largest_scc_diam = nx.diameter(largest_scc)
-		allfiles_largest_scc_diam_lst.append(largest_scc_diam)
-		print("largest scc diameter completed - ", largest_scc_diam)
-		'''
-
+'''
 print(allfiles_cc_lst)
 print(allfiles_scc_lst)
 print(allfiles_largest_cc_lst)
@@ -84,6 +82,26 @@ print(allfiles_largest_cc_len_lst)
 print(allfiles_largest_scc_len_lst)
 print(allfiles_largest_cc_diam_lst)
 print(allfiles_largest_scc_diam_lst)
+'''
+
+'''
+largest_cc_ecc = pickle.load(open("ecc_cc.pkl", "rb"))
+largest_scc_ecc = pickle.load(open("ecc_scc.pkl", "rb"))
+
+distances_cc = list(largest_cc_ecc.values())
+
+diameter = np.max(distances)
+mean = np.mean(distances)
+median = np.median(distances)
+eff_diam = np.percentile(distances, 90)
+
+print(diameter)
+print(mean)
+print(median)
+print(eff_diam)
+'''
+
+
 '''
 ../dataset/wiki_vote/Wiki-Vote.txt
 7066

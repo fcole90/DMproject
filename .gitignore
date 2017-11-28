@@ -122,3 +122,6 @@ dmproject/dataset/*
 !dmproject/dataset/gplus/dataset.txt
 !dmproject/dataset/soc_pokec/dataset.txt
 !dmproject/dataset/wiki_vote/dataset.txt
+
+# pickle files 
+*.cache
