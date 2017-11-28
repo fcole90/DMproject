@@ -1,10 +1,8 @@
-from hashlib import md5
-import json
 import os
 import pickle
 
 
-CACHE_DIR = "dmproject/dataset"
+CACHE_DIR = os.path.join("dmproject", "cache")
 
 
 def save_to_cache(name, object):
