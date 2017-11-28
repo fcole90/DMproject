@@ -100,9 +100,25 @@ ENV/
 # mypy
 .mypy_cache/
 
+
+# --- Custom rules ---
+
 # intellij IDEs
 .idea
 
+# do not track cache
+dmproject/cache
 
-# per non caricare i dataset
-dataset/*
+# but track cache folder
+!dmproject/cache/cache.txt
+
+
+# do not track datasets
+dmproject/dataset/*
+
+# but track dataset folders
+!dmproject/dataset/dataset.txt
+!dmproject/dataset/epinions/dataset.txt
+!dmproject/dataset/gplus/dataset.txt
+!dmproject/dataset/soc_pokec/dataset.txt
+!dmproject/dataset/wiki_vote/dataset.txt
