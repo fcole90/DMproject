@@ -102,3 +102,7 @@ ENV/
 
 # intellij IDEs
 .idea
+
+
+# per non caricare i dataset
+dataset/*
