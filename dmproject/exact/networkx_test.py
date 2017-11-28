@@ -4,12 +4,14 @@ import matplotlib.pyplot as plt
 from networkx.algorithms.components import strongly_connected_component_subgraphs
 from networkx.algorithms.components import connected_component_subgraphs
 import timeit
+import os
 
 graph_files = []
-graph_files.append("../dataset/wiki_vote/Wiki-Vote.txt")
-#graph_files.append("../dataset/epinions/soc-Epinions1.txt")
-#graph_files.append("../dataset/gplus/gplus_combined.txt")
-#graph_files.append("../dataset/soc_pokec/soc-pokec-relationships.txt")
+graph_files.append(os.path.join(os.path.pardir, 'dataset', 'wiki_vote', 'Wiki-Vote.txt'))
+graph_files.append(os.path.join(os.path.pardir, 'dataset', 'epinions', 'soc-Epinions1.txt'))
+graph_files.append(os.path.join(os.path.pardir, 'dataset', 'gplus', 'gplus_combined.txt'))
+graph_files.append(os.path.join(os.path.pardir, 'dataset', 'soc_pokec', 'soc-pokec-relationships.txt'))
+
 
 allfiles_cc_lst = []
 allfiles_scc_lst = []
