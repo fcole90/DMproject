@@ -97,3 +97,47 @@ def median_diam(distribution):
 
 def get_stats(distribution):
     return (diameter(distribution), eff_diam(distribution), mean_diam(distribution), median_diam(distribution))
+
+def exact_computation(G, dG, graphname):
+    start_time = time.time()
+
+    stats_cc, stats_scc = exact_computation_wrapped(G, dG, graphname)
+
+    end_time = time.time()
+    run_time = end_time - start_time
+    return stats_cc, stats_scc, run_time
+
+def exact_computation(fh, graphname):
+    start_time = time.time()
+
+    dG = nx.read_adjlist(fh, create_using=nx.DiGraph())
+    G = dG.to_undirected()
+
+    stats_cc, stats_scc = exact_computation_wrapped(G, dG, graphname)
+
+    end_time = time.time()
+    run_time = end_time - start_time
+
+    return stats_cc, stats_scc, run_time
+
+def exact_computation_wrapped(G, dG, graphname):
+    cc_lst, _ = load_or_do(graphname + "_cc_list.pkl", True, get_cc, G)
+    scc_lst, _ = load_or_do(graphname + "_scc_list.pkl", True, get_scc, dG)
+
+    largest_cc, _ = load_or_do(graphname + "_largest_cc.pkl", True, get_largest_cc, cc_lst)
+    largest_scc, _ = load_or_do(graphname + "_largest_scc.pkl", True, get_largest_cc, scc_lst)
+
+    largest_cc_len = len(largest_cc)
+    largest_scc_len = len(largest_scc)
+
+    largest_cc_mat = nx.all_pairs_shortest_path_length(largest_cc)
+    largest_scc_mat = nx.all_pairs_shortest_path_length(largest_scc)
+
+    largest_cc_distribution = load_or_do(graphname + "_shortestpath_cc.pkl", True, get_distribution_lst, largest_cc_mat)
+    largest_cc_stats = get_stats(largest_cc_distribution)
+
+    largest_scc_distribution = load_or_do(graphname + "_shortestpath_scc.pkl", True, get_distribution_lst,
+                                          largest_scc_mat)
+    largest_scc_stats = get_stats(largest_scc_distribution)    
+
+    return largest_cc_stats, largest_scc_stats
