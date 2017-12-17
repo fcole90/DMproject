@@ -8,7 +8,7 @@ import os
 import utils as utils
 import pickle
 
-import dmproject.utils.utils as utils
+import dmproject.utils.utils as dm_utils
 
 graph_files = []
 graph_files.append(os.path.join('dataset', 'wiki_vote', 'Wiki-Vote.txt'))
