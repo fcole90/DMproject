@@ -23,7 +23,7 @@ allfiles_largest_cc_len_lst = []
 allfiles_largest_scc_len_lst = []
 allfiles_largest_cc_diam_lst = []
 allfiles_largest_scc_diam_lst = []
-allfiles_timing
+
 
 for file in graph_files:
 
@@ -36,11 +36,11 @@ for file in graph_files:
 		# weakly cc
 		cc = connected_component_subgraphs(G)
 		cc_list = list(cc)
-		allfiles_cc_lst.append(cc)		
+		allfiles_cc_lst.append(cc)
 		print("cc completed")
 		pickle.dump(cc_list, open("cc_list.pkl", "wb"))
-		
-		# strongly cc 
+
+		# strongly cc
 		scc = strongly_connected_component_subgraphs(dG)
 		scc_list = list(scc)
 		allfiles_scc_lst.append(scc)
@@ -48,13 +48,13 @@ for file in graph_files:
 
 		# largest cc/scc
 		cc_sizes = np.argsort([g.size() for g in cc_list])
-		largset_cc_pos = cc_sizes[-1]		
+		largset_cc_pos = cc_sizes[-1]
 		largest_cc = cc_list[largset_cc_pos]
 		allfiles_largest_cc_lst.append(largest_cc)
 		print("largest cc completed")
 
 		scc_sizes = np.argsort([g.size() for g in scc_list])
-		largset_scc_pos = scc_sizes[-1]		
+		largset_scc_pos = scc_sizes[-1]
 		largest_scc = scc_list[largset_scc_pos]
 		allfiles_largest_scc_lst.append(largest_scc)
 		print("largest scc completed")
