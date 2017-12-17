@@ -2,15 +2,14 @@ from hashlib import md5
 import json
 import os
 import pickle
+import time
 
 CACHE_DIR = "dmproject/dataset"
 
 
 def save_to_cache(name, object):
     print("Caching {}...".format(name))
-    file_name = "{}.cache".format(name)
-    file_path = os.path.join(CACHE_DIR, file_name)
-    with open(file_path, "wb") as cache_file:
+    with open(name, "wb") as cache_file:
         pickle.dump(object, cache_file)
     print("Data for {} cached with success.".format(name))
 
@@ -25,17 +24,21 @@ def load_from_cache(name):
     return obj
 
 
-def load_or_do(name, f, save_if_not_found=False, *args, **kwargs):
+def load_or_do(name, save_if_not_found, f, *args):
     try:
-        obj = load_from_cache(name)
+        obj = pickle.load(open(name, "rb"))
+        run_time = 0
     except FileNotFoundError as e:
-        print("Cache for {} was not available, running the function instead..".format(name))
-        obj = f(*args, **kwargs)
+        # print("Cache for {} was not available, running the function instead..".format(name))
+        start_time = time.time()
+        obj = f(*args)
+        end_time = time.time()
+        run_time = end_time-start_time
 
         if save_if_not_found:
             save_to_cache(name, obj)
 
-    return obj
+    return obj, run_time
 
 
 import networkx as nx
@@ -44,23 +47,17 @@ from networkx.algorithms.components import strongly_connected_component_subgraph
 from networkx.algorithms.components import connected_component_subgraphs
 
 
-def get_cc(G, name, pickle_flag=True):
+def get_cc(G):
     cc = connected_component_subgraphs(G)
     cc_list = list(cc)
-
     print("cc completed")
-    if pickle_flag:
-        pickle.dump(cc_list, open(name + "_cc_list.pkl", "wb"))
     return cc_list
 
 
-def get_scc(G, name, pickle_flag=True):
+def get_scc(G):
     scc = strongly_connected_component_subgraphs(G)
     scc_list = list(scc)
-
     print("scc completed")
-    if pickle_flag:
-        pickle.dump(scc_list, open(name + "_scc_list.pkl", "wb"))
     return scc_list
 
 
@@ -93,3 +90,12 @@ def diameter(distribution):
 
 def eff_diam(distribution):
     return np.percentile(distribution, 90)
+
+def mean_diam(distribution):
+    return np.mean(distribution)
+
+def median_diam(distribution):
+    return np.median(distribution)
+
+def get_stats(distribution):
+    return (diameter(distribution), eff_diam(distribution), mean_diam(distribution), median_diam(distribution))
