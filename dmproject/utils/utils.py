@@ -96,7 +96,7 @@ def median_diam(distribution):
     return np.median(distribution)
 
 def get_stats(distribution):
-    return (diameter(distribution), eff_diam(distribution), mean_diam(distribution), median_diam(distribution))
+    return [diameter(distribution), eff_diam(distribution), mean_diam(distribution), median_diam(distribution)]
 
 def exact_computation(G, dG, graphname):
     start_time = time.time()
