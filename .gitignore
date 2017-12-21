@@ -104,7 +104,7 @@ ENV/
 # --- Custom rules ---
 
 # intellij IDEs
-.idea
+.idea/*
 
 # do not track cache
 dmproject/cache
@@ -125,3 +125,5 @@ dmproject/dataset/*
 
 # pickle files 
 *.cache
+
+.dropbox.attr
