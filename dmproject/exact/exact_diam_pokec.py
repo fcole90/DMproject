@@ -7,10 +7,12 @@ import timeit
 import os
 
 #workdir = "/home/michele/aalto/dm/DMproject/dmproject/exact"
-workdir = "/u/08/colellf1/unix/dm/DMproject/dmproject/exact"
+#workdir = "/u/08/colellf1/unix/dm/DMproject/dmproject/exact"
+workdir = "/home/jovyan/DMproject/dmproject/exact"
 
 # utildir = '/home/michele/aalto/dm/DMproject/dmproject/utils'
-utildir = "/u/08/colellf1/unix/dm/DMproject/dmproject/utils"
+#utildir = "/u/08/colellf1/unix/dm/DMproject/dmproject/utils"
+utildir = "/home/jovyan/DMproject/dmproject/utils"
 
 if(os.curdir != workdir):
     os.chdir(workdir)
@@ -25,11 +27,14 @@ import time
 
 
 graph_files = []
-graph_files.append(os.path.join(os.path.pardir, 'dataset', 'wiki_vote', 'Wiki-Vote.txt'))
-graph_files.append(os.path.join(os.path.pardir, 'dataset', 'epinions', 'soc-Epinions1.txt'))
-graph_files.append(os.path.join(os.path.pardir, 'dataset', 'gplus', 'gplus_combined.txt'))
+#graph_files.append(os.path.join(os.path.pardir, 'dataset', 'wiki_vote', 'Wiki-Vote.txt'))
+#graph_files.append(os.path.join(os.path.pardir, 'dataset', 'epinions', 'soc-Epinions1.txt'))
+#graph_files.append(os.path.join(os.path.pardir, 'dataset', 'gplus', 'gplus_combined.txt'))
 graph_files.append(os.path.join(os.path.pardir, 'dataset', 'soc_pokec', 'soc-pokec-relationships.txt'))
-graph_names = ["wikivote", "epinions", "gplus", "pokec"]
+graph_names = [#"wikivote", 
+               #"epinions", 
+               #"gplus", 
+               "pokec"]
 
 
 allfiles_cc_lst = []
