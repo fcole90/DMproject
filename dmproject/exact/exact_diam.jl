@@ -2,7 +2,7 @@ Pkg.add("LightGraphs")
 
 using LightGraphs
 #using GraphIO
-# using StaticGraphs
+using StaticGraphs
 
 # --- Settings ---
 I_feel_epic = false  # Do you feel epic?
@@ -237,7 +237,7 @@ for (filename, graphname) in zip(graph_files, graph_names)
     # Compute the all pairs shortest path
     println("All pairs shortest path length CC")
     tic()
-    largest_cc_mat = floyd_warshall_shortest_paths(largest_cc)
+    largest_cc_mat = floyd_warshall_shortest_paths(StaticGraph(largest_cc))
     toc()
     println("Completed cc!")
     
@@ -283,7 +283,7 @@ for (filename, graphname) in zip(graph_files, graph_names)
     # Compute the all pairs shortest path
     println("All pairs shortest path length SCC")
     tic()
-    largest_scc_mat = floyd_warshall_shortest_paths(largest_scc)
+    largest_scc_mat = floyd_warshall_shortest_paths(StaticDiGraph(largest_scc))
     toc()
     println("Completed scc!")
         
