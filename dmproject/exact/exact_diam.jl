@@ -1,5 +1,7 @@
+Pkg.add("LightGraphs")
+
 using LightGraphs
-using GraphIO
+#using GraphIO
 # using StaticGraphs
 
 # --- Settings ---
@@ -9,8 +11,9 @@ use_cache = true
 
 # --- Paths ---
 # base workdir
-base_workdir = "/home/fabio/Dropbox/Aalto Macadamia/I period/AMDM - Algorithmic Methods of Data Mining/assignments/DMproject/dmproject"
+#base_workdir = "/home/fabio/Dropbox/Aalto Macadamia/I period/AMDM - Algorithmic Methods of Data Mining/assignments/DMproject/dmproject"
 #base_workdir = "/home/michele/aalto/dm/DMproject/dmproject"
+base_workdir = "/home/jovyan/DMproject/dmproject"
 
 # Star is used for string concatenation
 workdir = joinpath(base_workdir, "exact")
@@ -118,6 +121,42 @@ function get_stats(distribution)
         median_diam(distribution))
 end
 
+function saveedgelist(io, g)
+    g_file = open(io, "w")
+    for e in edges(g)   
+        write(g_file, string(e.src) * ", " * string(e.dst) * "\n")
+    end
+    close(g_file)
+end
+
+function loadedgelist(io, gname::String)
+    srcs = Vector{String}()
+    dsts = Vector{String}()
+    while !eof(io)
+        line = strip(chomp(readline(io)))
+        if !startswith(line, "#") && (line != "")
+#             println("linelength = $(length(line)), line = $line")
+            r = r"(\w+)[\s,]+(\w+)"
+            src_s, dst_s = match(r, line).captures
+#             println("src_s = $src_s, dst_s = $dst_s")
+            push!(srcs, src_s)
+            push!(dsts, dst_s)
+        end
+    end
+    vxset = unique(vcat(srcs, dsts))
+    vxdict = Dict{String,Int}()
+    for (v, k) in enumerate(vxset)
+        vxdict[k] = v
+    end
+
+    n_v = length(vxset)
+    g = LightGraphs.DiGraph(n_v)
+    for (u, v) in zip(srcs, dsts)
+        add_edge!(g, vxdict[u], vxdict[v])
+    end
+    return g
+end
+
 
 # --- Files ---
 graph_files = []
@@ -154,78 +193,109 @@ allfiles_scc_stats = []
 
 
 # --- Loop ---
-
 for (filename, graphname) in zip(graph_files, graph_names)
     println("Working on ", graphname)
-    
-    # Count the time from here
-    tic()
     
     # Defining cache name format
     cache_graph_name_prefix = "jl_adj_list_"
     cache_cc_name = cache_graph_name_prefix * graphname * "_cc.txt"
     cache_scc_name = cache_graph_name_prefix * graphname * "_scc.txt"
     
+    
+    # --- CC ---
+    
     # Check availability of edge list for largest CC or compute it
-    if use_cache == true && isfile(joinpath(workdir, cache_cc_name))
+    if use_cache == true && isfile(joinpath(workdir, "readable_" * cache_cc_name))
         println("Using cached version!")
-        largest_cc = Graph(loadgraph(cache_cc_name, "", EdgeListFormat()))
+        open(joinpath(workdir, "readable_" * cache_cc_name), "r") do f
+            largest_cc = Graph(loadedgelist(f, ""))
+        end
+        saveedgelist(joinpath(workdir, "readable_" * cache_cc_name), largest_cc)        
     else
         println("Generating largest CC graph..")
         # Load graph
-        G = Graph(loadgraph(filename, "", EdgeListFormat()))
+        open(joinpath(workdir, filename)) do f
+            G = Graph(loadedgelist(f, ""))
+        end
+        tic()
         cc_lst = connected_components(G)
         # Get the largest connected component (as a list of nodes)
         (largest_cc_as_list, largest_cc_len) = get_largest_cc(cc_lst)
+        cc_lst = 0 #  deallocate
         println("largest cc len completed")
         println("Largest CC len: ", largest_cc_len)
         # Convert the graph for cc to undirected
         largest_cc = get_largest_cc_as_graph(largest_cc_as_list, G, true)
+        toc()
+        largest_cc_as_list = 0  # deallocate
+        G = 0
         println("Graph creation completed!")
-        savegraph(cache_cc_name, largest_cc, "", EdgeListFormat())
+        saveedgelist(joinpath(workdir, "readable_" * cache_cc_name), largest_cc)
     end
     
+    
+    # Compute the all pairs shortest path
+    println("All pairs shortest path length CC")
+    tic()
+    largest_cc_mat = floyd_warshall_shortest_paths(largest_cc)
+    toc()
+    println("Completed cc!")
+    
+    # Compute largest CC distribution
+    println("Distribution of largest cc")
+    largest_cc_distribution = get_distribution_lst(largest_cc_mat, vertices(largest_cc))
+    largest_cc_stats = get_stats(largest_cc_distribution)
+    println(graphname, " - CC stats: ", largest_cc_stats)
+    largest_cc = 0  # deallocate
+    largest_cc_mat = 0  # deallocate
+    gc() # garbage collect
+    
+    
+    # --- SCC ---
+    
     # Check availability of edge list for largest SCC or compute it
-    if use_cache == true && isfile(joinpath(workdir, cache_scc_name))
-        largest_scc = loadgraph(cache_scc_name, "", EdgeListFormat())
+    if use_cache == true && isfile(joinpath(workdir, "readable_" * cache_scc_name))
+        open(joinpath(workdir, "readable_" * cache_scc_name), "r") do f
+            largest_scc = loadedgelist(f, "")
+        end
+        saveedgelist(joinpath(workdir, "readable_" * cache_scc_name), largest_scc)        
     else
         println("Generating largest SCC graph..")
         # Load graph
-        dG = loadgraph(filename, "", EdgeListFormat())
+        open(joinpath(workdir, filename)) do f
+            dG = DiGraph(loadedgelist(f, ""))
+        end
+        tic()
         scc_lst = strongly_connected_components(dG)
         # Get the largest connected component (as a list of nodes)
         (largest_scc_as_list, largest_scc_len) = get_largest_cc(scc_lst)
+        scc_lst = 0 #  deallocate
         println("largest scc len completed")
         println("Largest SCC len: ", largest_scc_len)
         largest_scc = get_largest_cc_as_graph(largest_scc_as_list, dG, false)
+        toc()
+        largest_scc_as_list = 0  # deallocate
+        dG = 0
         println("Graph creation completed!")
-        savegraph(cache_scc_name, largest_scc, "", EdgeListFormat())
+        saveedgelist(joinpath(workdir, "readable_" * cache_scc_name), largest_scc)
     end
     
-    
-#     # Compute the all pairs shortest path
-#     println("All pairs shortest path length")
-    
-#     largest_cc_mat = floyd_warshall_shortest_paths(largest_cc)
-#     println("Completed cc!")
-    
-#     largest_scc_mat = floyd_warshall_shortest_paths(largest_scc)
-#     println("Completed scc!")
+    # Compute the all pairs shortest path
+    println("All pairs shortest path length SCC")
+    tic()
+    largest_scc_mat = floyd_warshall_shortest_paths(largest_scc)
+    toc()
+    println("Completed scc!")
         
-    
-#     # Compute largest SCC distribution
-#     println("Distribution of largest scc")
-#     largest_scc_distribution = get_distribution_lst(largest_scc_mat, vertices(largest_scc))
-#     largest_scc_stats = get_stats(largest_scc_distribution)
-#     println(graphname, " - SCC stats: ", largest_scc_stats)
-    
-#     # Compute largest CC distribution
-#     println("Distribution of largest cc")
-#     largest_cc_distribution = get_distribution_lst(largest_cc_mat, vertices(largest_cc))
-#     largest_cc_stats = get_stats(largest_cc_distribution)
-#     println(graphname, " - CC stats: ", largest_cc_stats)
-    
-    toc()  # print time from tic()
+    # Compute largest SCC distribution
+    println("Distribution of largest scc")
+    largest_scc_distribution = get_distribution_lst(largest_scc_mat, vertices(largest_scc))
+    largest_scc_stats = get_stats(largest_scc_distribution)
+    println(graphname, " - SCC stats: ", largest_scc_stats)
+    largest_scc = 0  # deallocate
+    largest_scc_mat = 0  # deallocate
+    gc() # garbage collect
+
+    # A little of space between iterations
     println("\n")
-#     break
 end
