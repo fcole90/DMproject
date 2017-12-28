@@ -126,5 +126,6 @@ dmproject/dataset/*
 # pickle files 
 *.cache
 *.pkl
+readable_jl*
 
 .dropbox.attr
