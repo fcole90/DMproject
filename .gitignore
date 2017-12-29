@@ -106,13 +106,6 @@ ENV/
 # intellij IDEs
 .idea/*
 
-# do not track cache
-dmproject/cache
-
-# but track cache folder
-!dmproject/cache/cache.txt
-
-
 # do not track datasets
 dmproject/dataset/*
 
@@ -126,6 +119,10 @@ dmproject/dataset/*
 # pickle files 
 *.cache
 *.pkl
+*.jld
+
+
+
 readable_jl*
 
 .dropbox.attr
