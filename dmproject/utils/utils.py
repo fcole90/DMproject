@@ -7,19 +7,19 @@ CACHE_DIR = os.path.join("dmproject", "cache")
 
 
 def save_to_cache(name, object):
-    print("Caching {}...".format(name))
+    #print("Caching {}...".format(name))
     with open(name, "wb") as cache_file:
         pickle.dump(object, cache_file)
-    print("Data for {} cached with success.".format(name))
+    #print("Data for {} cached with success.".format(name))
 
 
 def load_from_cache(name):
-    print("Loading {} from cache..")
+    #print("Loading {} from cache..")
     file_name = "{}.cache".format(name)
     file_path = os.path.join(CACHE_DIR, file_name)
     with open(file_path, "rb") as cache_file:
         obj = pickle.load(cache_file)
-    print("Data for {} loaded with success.".format(name))
+    #print("Data for {} loaded with success.".format(name))
     return obj
 
 
@@ -27,8 +27,8 @@ def load_or_do(name, save_if_not_found, f, *args):
     try:
         obj = pickle.load(open(name, "rb"))
         run_time = 0
-    except FileNotFoundError as e:
-        print("Cache for {} was not available, running the function instead..".format(name))
+    except Exception as e:
+        #print("Cache for {} was not available, running the function instead..".format(name))
         start_time = time.time()
         obj = f(*args)
         end_time = time.time()
@@ -87,6 +87,17 @@ def get_distribution_lst(mat):
 
     return distribution
 
+def get_distribution_lst_bfs(mat):
+    distribution = dict()
+    for i in range(len(mat)):
+        src_node = mat[i][0]
+        min_dist_dict = mat[i][1]
+        for target_node, min_dist in min_dist_dict.items():
+            if (not ((src_node, target_node) in distribution)) and  (not((target_node, src_node) in distribution)):
+               distribution[(src_node, target_node)] = min_dist
+
+    return distribution.values()
+
 
 class Stats:
     diam = 0.0
@@ -129,6 +140,10 @@ def get_stats(mat):
     distribution = get_distribution_lst(mat)
     return [diameter(distribution), eff_diam(distribution), mean_diam(distribution), median_diam(distribution)]
 
+def get_stats_bfs(mat):
+    distribution = get_distribution_lst_bfs(mat)
+    return [diameter(distribution), eff_diam(distribution), mean_diam(distribution), median_diam(distribution)]
+
 def aggregate_stats(stats_n):
     diam = np.max(stats_n[:, 0])
     mean_diam = np.mean(stats_n[:, 2])
@@ -164,35 +179,31 @@ def get_apspl_mat(obj):
 def exact_computation_wrapped(G, graphname):
     if isinstance(G, nx.DiGraph):
         gtype = "scc"
-        scc_lst, _ = load_or_do(graphname + "_" + gtype + "_list.pkl", True, get_scc, G)
-        largest_scc, _ = load_or_do(graphname + "_largest_" + gtype + ".pkl", True, get_largest_cc, scc_lst)
-        largest_scc_len = len(largest_scc)
         largest_scc_mat = load_or_do(graphname + "_shortestpath_" + gtype + ".pkl", True, get_apspl_mat,
-                                    nx.all_pairs_shortest_path_length(largest_scc))
+                                    nx.all_pairs_shortest_path_length(G))
         stats = get_stats(largest_scc_mat)
     else:
         gtype = "cc"
-        cc_lst, _ = load_or_do(graphname + "_" + gtype + "_list.pkl", True, get_cc, G)
-        largest_cc, _ = load_or_do(graphname + "_largest_" + gtype + ".pkl", True, get_largest_cc, cc_lst)
-        largest_cc_len = len(largest_cc)
-
         largest_cc_mat = load_or_do(graphname + "_shortestpath_" + gtype + ".pkl", True, get_apspl_mat,
-                                    nx.all_pairs_shortest_path_length(largest_cc))
-        stats = get_stats(largest_cc_mat, directed=False)
+                                    nx.all_pairs_shortest_path_length(G))
+        stats = get_stats(largest_cc_mat)
 
     return stats
 
-def reservoir_sampling_edges(G, dim, n_repetitions, p_samples, directed):
+def reservoir_sampling_edges(G, n_repetitions, p_samples, directed):
     samples_mat_p = []
     for p in p_samples:
-        samples_count = int(dim*p)
+        samples_count = p#int(dim*p)
         #print(samples_count)
         samples_mat = []
         for n in n_repetitions:
             sampled_sub_graphs = []
             for i in range(n):
-                subG = create_empty_graph(directed)
 
+                shuffled_nodes = np.random.permutation(list(G.edges))
+                subset = shuffled_nodes[:samples_count]
+                subG = create_graph(directed, subset)
+                '''
                 counter = 0
                 for t, edge in enumerate(G.edges):
                     prob = np.random.uniform()
@@ -203,23 +214,25 @@ def reservoir_sampling_edges(G, dim, n_repetitions, p_samples, directed):
                         counter +=1
                     if counter == samples_count:
                         break
+                '''
                 sampled_sub_graphs.append(subG)
             samples_mat.append(sampled_sub_graphs)
         samples_mat_p.append(samples_mat)
     return samples_mat_p
 
 
-def reservoir_sampling_nodes(G, dim, n_repetitions, p_samples, directed):
+def reservoir_sampling_nodes(G, n_repetitions, p_samples, directed):
     samples_mat_p = []
     for p in p_samples:
-        samples_count = int(dim*p)
+        samples_count = p#int(dim*p)
         #print(samples_count)
         samples_mat = []
         for n in n_repetitions:
             sampled_sub_graphs = []
             for i in range(n):
-                subset = []
-
+                shuffled_nodes = np.random.permutation(list(G.nodes))
+                subset = shuffled_nodes[:samples_count]
+                '''
                 counter = 0
                 for t, node in enumerate(G.nodes):
                     prob = np.random.uniform()
@@ -230,14 +243,30 @@ def reservoir_sampling_nodes(G, dim, n_repetitions, p_samples, directed):
                         counter +=1
                     if counter == samples_count:
                         break
+                '''
                 sampled_sub_graphs.append(subset)
             samples_mat.append(sampled_sub_graphs)
         samples_mat_p.append(samples_mat)
     return samples_mat_p
 
-def create_empty_graph(directed):
+def create_graph(directed, edges):
     if directed:
         G = nx.DiGraph()
     else:
         G = nx.Graph()
+
+    for edge in edges:
+        G.add_edge(edge[0], edge[1])
+
     return  G
+
+def all_pairs_shortest_path_bfs(G, selected_nodes):
+    #if isinstance(G, nx.DiGraph):
+    #else:
+    shortest_path_mat = []
+    for node in selected_nodes:
+        #print("started")
+        shortest_path_len = nx.single_source_shortest_path_length(G, node)
+        #print("finished")
+        shortest_path_mat.append((node, shortest_path_len))
+    return shortest_path_mat
