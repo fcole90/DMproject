@@ -6,6 +6,16 @@ The project has been tested on Ubuntu 16.04 Xenial and 18.04 Bionic. While the
 project is cross platform in its nature, there might be some problems while using
 different systems.
 
+Please, run each script from the folder in which the file is.
+
+If using jupyter notebook, run it from the folder in which the file is.
+
+Example:
+```
+cd DMproject/dmproject/exact
+jupyter notebook
+```
+
 
 ## General setup
 
@@ -39,7 +49,7 @@ not set in stone).
 
 ```shell
 wget https://julialang-s3.julialang.org/bin/linux/x64/0.6/julia-0.6.2-linux-x86_64.tar.gz
-tar -xzf julia
+tar -xzf julia-0.6.2-linux-x86_64.tar.gz
 ```
 
 This will download and extract the Julia compiler. You can run Julia from

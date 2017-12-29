@@ -1,37 +1,28 @@
+# Please run `jupyter notebook` from the folder in which is this file (it uses getcwd()!)
+%reload_ext autoreload
+%autoreload 2
+
 import networkx as nx
 import numpy as np
-import matplotlib.pyplot as plt
 from networkx.algorithms.components import strongly_connected_component_subgraphs
 from networkx.algorithms.components import connected_component_subgraphs
 import timeit
 import os
 
+workdir = os.getcwd()
+utildir = os.path.join(workdir, os.path.pardir, "utils")
 
-import pickle
-import time
-import networkx as nx
-import numpy as np
-import matplotlib.pyplot as plt
-from networkx.algorithms.components import strongly_connected_component_subgraphs
-from networkx.algorithms.components import connected_component_subgraphs
-import timeit
-import os
-
-
-import pickle
-import time
-
-workdir = "/home/michele/aalto/dm/DMproject/dmproject/approximate"
 if(os.curdir != workdir):
-    os.chdir("/home/michele/aalto/dm/DMproject/dmproject/approximate")
+    os.chdir(workdir)
 
 import sys
-sys.path.insert(0, '/home/michele/aalto/dm/DMproject/dmproject/utils')
+sys.path.insert(0, utildir)
 
 import utils
+import pickle
+import time
 
 
-# In[17]:
 
 graph_files = []
 graph_files.append(os.path.join(os.path.pardir, 'dataset', 'wiki_vote', 'Wiki-Vote.txt'))
