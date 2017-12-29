@@ -2,7 +2,7 @@ Pkg.add("LightGraphs")
 Pkg.add("JLD")
 
 using LightGraphs
-using JLD
+#using JLD
 #using GraphIO
 #using StaticGraphs
 
@@ -236,14 +236,14 @@ for (filename, graphname) in zip(graph_files, graph_names)
     println("All pairs shortest path length SCC")
     tic()
     largest_scc_mat = floyd_warshall_shortest_paths(largest_scc)
-    save(joinpath(workdir, graphname * "_largest_scc_mat.jld"), "largest_scc_mat", largest_scc_mat)
+    #save(joinpath(workdir, graphname * "_largest_scc_mat.jld"), "largest_scc_mat", largest_scc_mat)
     toc()
     println("Completed scc!")
         
     # Compute largest SCC distribution
     println("Distribution of largest scc")
     largest_scc_distribution = get_distribution_lst(largest_scc_mat, vertices(largest_scc))
-    save(joinpath(workdir, graphname * "_largest_scc_distribution.jld"), "largest_scc_distribution", largest_scc_distribution)
+    #save(joinpath(workdir, graphname * "_largest_scc_distribution.jld"), "largest_scc_distribution", largest_scc_distribution)
     largest_scc_stats = get_stats(largest_scc_distribution)
     println(graphname, " - SCC stats: ", largest_scc_stats)
     largest_scc = 0  # deallocate
@@ -287,14 +287,14 @@ for (filename, graphname) in zip(graph_files, graph_names)
     println("All pairs shortest path length CC")
     tic()
     largest_cc_mat = floyd_warshall_shortest_paths(largest_cc)
-    save(joinpath(workdir, graphname * "_largest_cc.jld"), "largest_cc", largest_cc)
+    #save(joinpath(workdir, graphname * "_largest_cc.jld"), "largest_cc", largest_cc)
     toc()
     println("Completed cc!")
     
     # Compute largest CC distribution
     println("Distribution of largest cc")
     largest_cc_distribution = get_distribution_lst(largest_cc_mat, vertices(largest_cc))
-    save(joinpath(workdir, graphname * "_largest_cc_distribution.jld"), "largest_cc_distribution", largest_cc_distribution)
+    #save(joinpath(workdir, graphname * "_largest_cc_distribution.jld"), "largest_cc_distribution", largest_cc_distribution)
     largest_cc_stats = get_stats(largest_cc_distribution)
     println(graphname, " - CC stats: ", largest_cc_stats)
     largest_cc = 0  # deallocate
