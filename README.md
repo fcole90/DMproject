@@ -1,5 +1,9 @@
 # DMproject
 
+### Group project
+- [Fabio Colella](https://www.linkedin.com/in/fabio-colella-099858162/)
+- [Michele Vantini](https://www.linkedin.com/in/michele-vantini-9825bb42/)
+
 ## Environment
 
 The project has been tested on Ubuntu 16.04 Xenial and 18.04 Bionic. While the
